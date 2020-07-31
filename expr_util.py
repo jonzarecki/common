@@ -6,7 +6,7 @@ from constants import PROJECT_ROOT, _curr_time, STATE_DIR
 from file_util import list_all_files_in_folder
 from tee import Tee
 
-using_debugger = True  # getattr(sys, 'gettrace', None)() is not None
+using_debugger = getattr(sys, 'gettrace', None)() is not None
 
 
 def save_all_py_files(folder_path, save_output=True):
