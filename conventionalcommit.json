@@ -1,0 +1,110 @@
+{
+  "types": {
+    "refactor": {
+      "description": "Changes which neither fix a bug nor add a feature",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "fix": {
+      "description": "Changes which patch a bug",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "feat": {
+      "description": "Changes which introduce a new feature",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "build": {
+      "description": "Changes which affect the build system or external dependencies (example scopes: gulp, broccoli, npm)",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "chore": {
+      "description": "Changes which aren’t user-facing",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "style": {
+      "description": "Changes which don't affect code logic.\nWhite-spaces, formatting, missing semi-colons, etc",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "test": {
+      "description": "Changes which add missing tests or correct existing tests",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "docs": {
+      "description": "Changes which affect documentation",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "perf": {
+      "description": "Changes which improve performance",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "ci": {
+      "description": "Changes which affect CI configuration files and scripts (example scopes: travis, circle, browser-stack, sauce-labs)",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    },
+    "revert": {
+      "description": "Changes which revert a previous commit",
+      "scopes": {
+        "config": {},
+        "checker": {},
+        "no-release": {}
+      }
+    }
+  },
+  "footerTypes": [
+    {
+      "name": "BREAKING CHANGE",
+      "description": "The commit introduces breaking API changes"
+    },
+    {
+      "name": "Closes",
+      "description": "The commit closes issues or pull requests"
+    },
+    {
+      "name": "Implements",
+      "description": "The commit implements features"
+    },
+    {
+      "name": "Co-authored-by",
+      "description": "The commit is co-authored by another person (for multiple people use one line each)"
+    }
+  ]
+}
