@@ -3,12 +3,10 @@ from __future__ import print_function, with_statement, division
 import copy
 import os
 import torch
-from pytorch_lightning import LightningModule
 from tqdm.autonotebook import tqdm
 from torch.optim.lr_scheduler import _LRScheduler
 import matplotlib.pyplot as plt
 
-from utils.multitask_training.mtl_model import MTLModel
 
 try:
     from apex import amp
@@ -472,7 +470,7 @@ class DataLoaderIterWrapper(object):
         return next(self)
 
 
-def apply_lr_finder(model: MTLModel):
+def apply_lr_finder(model: torch.Module):
     criterion = model.calc_loss
     trainloader = model.train_dataloader()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-7, momentum=0.9, weight_decay=5e-4)

@@ -2,16 +2,17 @@ import os
 from datetime import datetime
 import sys
 
-ORIG = 'orig'
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+PROJECT_NAME = os.path.basename(PROJECT_ROOT)
 USER_ROOT_DIR = os.path.dirname(os.path.dirname(PROJECT_ROOT))
 
 # consistent for all projects
 LONG_TERM_DIR = "/media/yonatanz/yz/"
 if not os.path.exists(LONG_TERM_DIR):
     LONG_TERM_DIR = "/cortex/users/jonzarecki/long_term/"
-PROJ_LONG_TERM_DIR = os.path.join(LONG_TERM_DIR, "TaskAugment")
+
+PROJ_LONG_TERM_DIR = os.path.join(LONG_TERM_DIR, PROJECT_NAME)
 DATA_LONG_TERM_DIR = os.path.join(LONG_TERM_DIR, "data")
 MODEL_LONG_TERM_DIR = os.path.join(LONG_TERM_DIR, "models")
 

@@ -1,0 +1,43 @@
+# base environment for my utils
+name: utils-environment
+channels:
+- pytorch
+- conda-forge
+- defaults
+
+dependencies:
+- python=3.7
+# Core scientific python
+- numpy
+- matplotlib
+- seaborn
+- pip
+- scikit-learn
+- scikit-image
+
+# Deep Learning
+- pytorch=>1.4
+- torchvision
+- cudatoolkit
+
+# Jupyter Environment
+- autopep8
+- notebook
+- ipython
+- jupyter_contrib_nbextensions
+- jupyterlab
+- jupyter
+- nb_conda
+
+# Web app / visualization
+- bokeh>2
+- holoviews
+#- panel  # To run in jupyterLab run:  `jupyter labextension install @pyviz/jupyterlab_pyviz`
+
+- pip:
+    - tensorflow>=2.1.0  # for complete feature-set tensorboard, not strictly necessary
+    - tensorboard>=2.1.0
+    - pytorch-lightning
+    - panel
+    - argparse
+    - pytorch-influence-functions

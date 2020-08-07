@@ -1,6 +1,7 @@
+import itertools
+
 from typing import List, TypeVar
 
-from future.moves import itertools
 _S = TypeVar('_S')
 
 
