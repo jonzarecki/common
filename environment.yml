@@ -39,4 +39,5 @@ dependencies:
       - pytorch-lightning
       - panel
       - argparse
+      - jupyterthemes
       - pytorch-influence-functions
