@@ -48,6 +48,12 @@ def plot_to_image(figure):
     canvas = figure.canvas
     canvas.draw()
     pil_image = Image.frombytes('RGB', canvas.get_width_height(),
-                 canvas.tostring_rgb())
+                                canvas.tostring_rgb())
     plt.close()
     return np.array(pil_image)
+
+
+def show_ndarray_in_matplotlib(img: np.ndarray):
+    img = Image.fromarray(img, 'RGB')
+    img.save('my.png')
+    img.show()
