@@ -1,18 +1,16 @@
 import os
-import pickle as pkl
 
 import numpy as np
-from PIL import Image
-from auto_tqdm import tqdm
 from bokeh.layouts import column
 from bokeh.layouts import row
 from bokeh.models import CustomJS, ColumnDataSource, Slider
 from bokeh.models.glyphs import ImageURL
 from bokeh.plotting import figure
 from bokeh.plotting import show
-from coord2vec.models.data_loading.tile_features_loader import TileFeaturesDataset, SingleTileFeaturesDataset
+
+# from coord2vec.models.data_loading.tile_features_loader import TileFeaturesDataset
+TileFeaturesDataset = None
 from tqdm import trange
-# from familyGan.load_data import get_files_from_path
 from PIL import Image
 
 
@@ -41,7 +39,6 @@ def _save_tile_images_to_local_path(dataset: TileFeaturesDataset, max_photos=Non
     os.makedirs("pics/", exist_ok=True)
     a_img_paths, b_img_paths, c_img_paths = [], [], []
     for i in trange(min(len(dataset), max_photos), desc="loading tiles"):
-
         img_a = dataset[i][0][0]
         img_b = dataset[i][0][1]
         img_c = dataset[i][0][2]

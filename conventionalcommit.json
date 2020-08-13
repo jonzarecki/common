@@ -1,34 +1,34 @@
 {
   "types": {
     "refactor": {
-      "description": "Changes which neither fix a bug nor add a feature",
+      "description": "Changes which neither fix a bug nor add a feature"
     },
     "fix": {
-      "description": "Changes which patch a bug",
+      "description": "Changes which patch a bug"
     },
     "submodule": {
-      "description": "Change to a git submodule pointer",
+      "description": "Change to a git submodule pointer"
     },
     "feat": {
-      "description": "Changes which introduce a new feature",
+      "description": "Changes which introduce a new feature"
     },
     "notebooks": {
-      "description": "Updates/Additions of jupyter-notebooks",
+      "description": "Updates/Additions of jupyter-notebooks"
     },
     "experiment": {
-      "description": "Updates/Additions of experiment code",
+      "description": "Updates/Additions of experiment code"
     },
     "test": {
-      "description": "Changes which add missing tests or correct existing tests",
+      "description": "Changes which add missing tests or correct existing tests"
     },
     "docs": {
-      "description": "Changes which affect documentation",
+      "description": "Changes which affect documentation"
     },
     "ci": {
-      "description": "Changes which affect CI configuration files and scripts (example scopes: travis, circle, browser-stack, sauce-labs)",
+      "description": "Changes which affect CI configuration files and scripts (example scopes: travis, circle, browser-stack, sauce-labs)"
     },
     "revert": {
-      "description": "Changes which revert a previous commit",
+      "description": "Changes which revert a previous commit"
     }
   },
   "footerTypes": [

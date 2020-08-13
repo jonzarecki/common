@@ -1,12 +1,13 @@
 # taken from https://github.com/davidtvs/pytorch-lr-finder
 from __future__ import print_function, with_statement, division
+
 import copy
 import os
-import torch
-from tqdm.autonotebook import tqdm
-from torch.optim.lr_scheduler import _LRScheduler
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import torch
+from torch.optim import lr_scheduler
+from tqdm.autonotebook import tqdm
 
 try:
     from apex import amp
@@ -62,13 +63,13 @@ class LRFinder(object):
     """
 
     def __init__(
-        self,
-        model,
-        optimizer,
-        criterion,
-        device=None,
-        memory_cache=True,
-        cache_dir=None,
+            self,
+            model,
+            optimizer,
+            criterion,
+            device=None,
+            memory_cache=True,
+            cache_dir=None,
     ):
         # Check if the optimizer is already attached to a scheduler
         self.optimizer = optimizer
@@ -102,16 +103,16 @@ class LRFinder(object):
         self.model.to(self.model_device)
 
     def range_test(
-        self,
-        train_loader,
-        val_loader=None,
-        start_lr=None,
-        end_lr=10,
-        num_iter=100,
-        step_mode="exp",
-        smooth_f=0.05,
-        diverge_th=5,
-        accumulation_steps=1,
+            self,
+            train_loader,
+            val_loader=None,
+            start_lr=None,
+            end_lr=10,
+            num_iter=100,
+            step_mode="exp",
+            smooth_f=0.05,
+            diverge_th=5,
+            accumulation_steps=1,
     ):
         """Performs the learning rate range test.
 
@@ -253,7 +254,7 @@ class LRFinder(object):
                 delay_unscale = ((i + 1) % accumulation_steps) != 0
 
                 with amp.scale_loss(
-                    loss, self.optimizer, delay_unscale=delay_unscale
+                        loss, self.optimizer, delay_unscale=delay_unscale
                 ) as scaled_loss:
                     scaled_loss.backward()
             else:
@@ -348,7 +349,7 @@ class LRFinder(object):
         plt.show()
 
 
-class LinearLR(_LRScheduler):
+class LinearLR(lr_scheduler._LRScheduler):
     """Linearly increases the learning rate between two boundaries over a number of
     iterations.
 
@@ -370,7 +371,7 @@ class LinearLR(_LRScheduler):
         return [base_lr + r * (self.end_lr - base_lr) for base_lr in self.base_lrs]
 
 
-class ExponentialLR(_LRScheduler):
+class ExponentialLR(lr_scheduler._LRScheduler):
     """Exponentially increases the learning rate between two boundaries over a number of
     iterations.
 

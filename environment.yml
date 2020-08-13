@@ -39,5 +39,6 @@ dependencies:
       - pytorch-lightning
       - panel
       - argparse
+      - pathos
       - jupyterthemes
       - pytorch-influence-functions

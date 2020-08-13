@@ -7,7 +7,7 @@ from typing import Callable, Iterable, List
 from pathos.pools import ProcessPool as Pool
 from tqdm.autonotebook import tqdm
 
-from coord2vec.common.itertools import flatten
+from common.itertools import flatten
 
 i = 0
 proc_count = 1
@@ -126,7 +126,7 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
         p.restart(force=True)
         # can throw if current proc is daemon
         if use_tqdm:
-            retval_par = tqdm(p.imap(lambda arg: s_fun(arg), args), total=int(len(X)/chunk_size),
+            retval_par = tqdm(p.imap(lambda arg: s_fun(arg), args), total=int(len(X) / chunk_size),
                               **tqdm_kwargs)
         else:
             # import  pdb
@@ -136,7 +136,6 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
         retval = list(retval_par)  # make it like the original map
         if chunk_size > 1:
             retval = flatten(retval)
-
 
         p.terminate()
         proc_count = old_proc_count
