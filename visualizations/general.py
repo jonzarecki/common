@@ -1,8 +1,11 @@
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from PIL import Image
+from torch.utils.data import Dataset
 
 
 def plot_confusion_matrix(confusion_matrix, class_names, figsize=(10, 8), fontsize=14):
@@ -57,3 +60,26 @@ def show_ndarray_in_matplotlib(img: np.ndarray):
     img = Image.fromarray(img, 'RGB')
     img.save('my.png')
     img.show()
+
+
+def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title=""):
+    """
+    Plot images from the dataset according to $idxs
+    Args:
+        ds: torch image Dataset
+        idxs: Indices that we want to plot
+        title: Title for the plot
+    """
+    image_datas = [ds[i][0].numpy().swapaxes(0, 2).swapaxes(0, 1) for i in idxs]
+    image_labels = [ds.classes[ds[i][1]] for i in idxs]
+
+    if len(idxs) == 1:
+        plt.imshow(image_datas[0])
+        plt.title(title)
+    else:
+        f, axarr = plt.subplots(1, len(idxs))
+        f.suptitle(title)
+        for j, idx in enumerate(idxs):
+            axarr[j].imshow(image_datas[j])
+            axarr[j].set_title(f"{idx} - {image_labels[j]}")
+    plt.show()
