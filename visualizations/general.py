@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from PIL import Image
+from matplotlib.figure import Figure
+from skimage import img_as_ubyte
 from torch.utils.data import Dataset
 
 
@@ -15,11 +17,11 @@ def plot_confusion_matrix(confusion_matrix, class_names, figsize=(10, 8), fontsi
     ---------
     confusion_matrix: numpy.ndarray
         The numpy.ndarray object returned from a call to sklearn.metrics.confusion_matrix.
-        Similarly constructed ndarrays can also be used.
+        Similarly, constructed ndarrays can also be used.
     class_names: list
         An ordered list of class names, in the order they index the given confusion matrix.
     figsize: tuple
-        A 2-long tuple, the first value determining the horizontal size of the ouputted figure,
+        A 2-long tuple, the first value determining the horizontal size of the outputted figure,
         the second determining the vertical size. Defaults to (10,7).
     fontsize: int
         Font size for axes labels. Defaults to 14.
@@ -27,7 +29,7 @@ def plot_confusion_matrix(confusion_matrix, class_names, figsize=(10, 8), fontsi
     Returns
     -------
     matplotlib.figure.Figure
-        The resulting confusion matrix figure
+        The resulting confusion matrix figure.
     """
     df_cm = pd.DataFrame(
         confusion_matrix, index=class_names, columns=class_names,
@@ -45,7 +47,7 @@ def plot_confusion_matrix(confusion_matrix, class_names, figsize=(10, 8), fontsi
     return fig
 
 
-def plot_to_image(figure):
+def figure_to_image(figure) -> np.ndarray:
     """Converts the matplotlib plot specified by 'figure' to a PNG image and
       returns it. The supplied figure is closed and inaccessible after this call."""
     canvas = figure.canvas
@@ -71,6 +73,8 @@ def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title=""):
         title: Title for the plot
     """
     image_datas = [ds[i][0].numpy().swapaxes(0, 2).swapaxes(0, 1) for i in idxs]
+    if image_datas[0].dtype == np.float32:
+        image_datas = [img_as_ubyte(img) for img in image_datas]
     image_labels = [ds.classes[ds[i][1]] for i in idxs]
 
     if len(idxs) == 1:
