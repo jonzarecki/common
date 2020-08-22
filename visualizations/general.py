@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from PIL import Image
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from skimage import img_as_ubyte
 from torch.utils.data import Dataset
@@ -64,26 +65,36 @@ def show_ndarray_in_matplotlib(img: np.ndarray):
     img.show()
 
 
-def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title=""):
+def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title="", fig: Figure = None):
     """
     Plot images from the dataset according to $idxs
     Args:
         ds: torch image Dataset
         idxs: Indices that we want to plot
         title: Title for the plot
+        fig: An optional figure to plot on
     """
     image_datas = [ds[i][0].numpy().swapaxes(0, 2).swapaxes(0, 1) for i in idxs]
     if image_datas[0].dtype == np.float32:
         image_datas = [img_as_ubyte(img) for img in image_datas]
     image_labels = [ds.classes[ds[i][1]] for i in idxs]
 
+    fig_avail = True
+    if fig is None:
+        fig_avail = False
+        fig = plt.figure()
+    axes: Union[Axes, List[Axes]] = fig.subplots(1, len(idxs))
+
+    fig.suptitle(title)
+
     if len(idxs) == 1:
-        plt.imshow(image_datas[0])
-        plt.title(title)
+        axes.imshow(image_datas[0])
+
     else:
-        f, axarr = plt.subplots(1, len(idxs))
-        f.suptitle(title)
         for j, idx in enumerate(idxs):
-            axarr[j].imshow(image_datas[j])
-            axarr[j].set_title(f"{idx} - {image_labels[j]}")
-    plt.show()
+            axes[j].imshow(image_datas[j])
+            axes[j].set_title(f"{idx} - {image_labels[j]}")
+    if fig_avail:
+        return fig
+    else:
+        plt.show()
