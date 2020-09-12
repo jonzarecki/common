@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -65,36 +65,52 @@ def show_ndarray_in_matplotlib(img: np.ndarray):
     img.show()
 
 
-def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title="", fig: Figure = None):
+def plot_examples_from_dataset(ds: Dataset, idxs: List[int], title="", ds_name=None, fig: Figure = None):
     """
     Plot images from the dataset according to $idxs
     Args:
         ds: torch image Dataset
         idxs: Indices that we want to plot
         title: Title for the plot
+        ds_name: an optional name of dataset, for correct normalization
         fig: An optional figure to plot on
     """
     image_datas = [ds[i][0].numpy().swapaxes(0, 2).swapaxes(0, 1) for i in idxs]
     if image_datas[0].dtype == np.float32:
-        image_datas = [img_as_ubyte(img) for img in image_datas]
+        for i, img in enumerate(image_datas):
+            im_max, im_min = max(1., img.max()), min(0., img.min())
+            img = (img - im_min) / (im_max - im_min)
+            image_datas[i] = img_as_ubyte(img)
+            # breakpoint()
+            pass
+        # image_datas = [img_as_ubyte(img) for img in image_datas]
     image_labels = [ds.classes[ds[i][1]] for i in idxs]
 
     fig_avail = True
     if fig is None:
         fig_avail = False
         fig = plt.figure()
-    axes: Union[Axes, List[Axes]] = fig.subplots(1, len(idxs))
+    axes: List[List[Axes]] = fig.subplots(len(idxs) // 3 + (1 if len(idxs) % 3 != 0 else 0), min(len(idxs), 3),
+                                          squeeze=False)
 
     fig.suptitle(title)
 
     if len(idxs) == 1:
-        axes.imshow(image_datas[0])
+        axes[0][0].imshow(image_datas[0])
+        axes[0][0].axis('off')
+        (width, height) = fig.get_size_inches()
+        fig.set_size_inches(height, height)
 
-    else:
-        for j, idx in enumerate(idxs):
-            axes[j].imshow(image_datas[j])
-            axes[j].set_title(f"{idx} - {image_labels[j]}")
+    for j, idx in enumerate(idxs):
+        # breakpoint()
+        axes[j // 3][j % 3].imshow(image_datas[j])
+        axes[j // 3][j % 3].axis('off')
+        axes[j // 3][j % 3].set_title(f"{idx} - {image_labels[j]}")
+    fig.tight_layout()
+    plt.tight_layout()
     if fig_avail:
         return fig
     else:
         plt.show()
+
+# TODO: add functionality from matplotlib to bokeh with image in between
