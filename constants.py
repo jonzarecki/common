@@ -1,7 +1,5 @@
 import os
 from datetime import datetime
-import sys
-
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 PROJECT_NAME = os.path.basename(PROJECT_ROOT)
@@ -20,6 +18,8 @@ _curr_time = datetime.now().isoformat(' ', 'seconds')
 
 TENSORBOARD_DIR = os.path.join(PROJ_LONG_TERM_DIR, "logs")
 STATE_DIR = os.path.join(PROJ_LONG_TERM_DIR, "expr_state")
+PROJ_MODELS_LONG_TERM_DIR = os.path.join(PROJ_LONG_TERM_DIR, "models")
+
 # CURRENT_EXPR_DIR = os.path.join(PROJ_LONG_TERM_DIR, os.path.basename(sys.argv[0]), _curr_time)
 # SAVED_MODEL_DIR = os.path.join(CURRENT_EXPR_DIR, 'models')
 # TMP_EXPR_FILES_DIR = os.path.join(CURRENT_EXPR_DIR, "project_files")
