@@ -1,7 +1,9 @@
+import copy
 import sys
 from typing import Tuple, List
 
 import yaml
+
 
 def extract_names_from_dict(d: dict, prefix="") -> List[Tuple[str, str]]:
     all_tpls = []
@@ -44,3 +46,17 @@ def convert_config_to_args():
                     sys.argv += c_val
                 else:
                     sys.argv.append(c_val)
+
+
+def make_config_loggable(args):
+    clean_args = copy.copy(args)
+    for k, v in args.__dict__.items():
+        if isinstance(v, (int, str, bool)):
+            continue
+        if isinstance(v, list):
+            if all(isinstance(itm, int) for itm in v):
+                clean_args.__dict__[k] = str(v)
+                continue
+        del clean_args.__dict__[k]
+
+    return clean_args
