@@ -16,7 +16,8 @@ dependencies:
   - scikit-image
 
   # Deep Learning
-  - pytorch=>1.4
+  - pytorch=>1.6
+  - pytorch-lightning=>1.1
   - torchvision
   - cudatoolkit
 
@@ -36,9 +37,8 @@ dependencies:
   - pip:
       - tensorflow>=2.1.0  # for complete feature-set tensorboard, not strictly necessary
       - tensorboard>=2.1.0
-      - pytorch-lightning
       - panel
+      - streamlit
       - argparse
       - pathos
       - jupyterthemes
-      - pytorch-influence-functions
