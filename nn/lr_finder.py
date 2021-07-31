@@ -1,8 +1,8 @@
 # taken from https://github.com/davidtvs/pytorch-lr-finder
-from __future__ import print_function, with_statement, division
 
 import copy
 import os
+import tempfile
 
 import matplotlib.pyplot as plt
 import torch
@@ -27,7 +27,7 @@ except ImportError:
     del logging
 
 
-class LRFinder(object):
+class LRFinder:
     """Learning rate range test.
 
     The learning rate range test increases the learning rate in a pre-training run
@@ -63,13 +63,13 @@ class LRFinder(object):
     """
 
     def __init__(
-            self,
-            model,
-            optimizer,
-            criterion,
-            device=None,
-            memory_cache=True,
-            cache_dir=None,
+        self,
+        model,
+        optimizer,
+        criterion,
+        device=None,
+        memory_cache=True,
+        cache_dir=None,
     ):
         # Check if the optimizer is already attached to a scheduler
         self.optimizer = optimizer
@@ -97,22 +97,21 @@ class LRFinder(object):
 
     def reset(self):
         """Restores the model and optimizer to their initial states."""
-
         self.model.load_state_dict(self.state_cacher.retrieve("model"))
         self.optimizer.load_state_dict(self.state_cacher.retrieve("optimizer"))
         self.model.to(self.model_device)
 
-    def range_test(
-            self,
-            train_loader,
-            val_loader=None,
-            start_lr=None,
-            end_lr=10,
-            num_iter=100,
-            step_mode="exp",
-            smooth_f=0.05,
-            diverge_th=5,
-            accumulation_steps=1,
+    def range_test(  # noqa: C901
+        self,
+        train_loader,
+        val_loader=None,
+        start_lr=None,
+        end_lr=10,
+        num_iter=100,
+        step_mode="exp",
+        smooth_f=0.05,
+        diverge_th=5,
+        accumulation_steps=1,
     ):
         """Performs the learning rate range test.
 
@@ -159,7 +158,6 @@ class LRFinder(object):
         https://medium.com/huggingface/ec88c3e51255)
         [thomwolf/gradient_accumulation](https://gist.github.com/thomwolf/ac7a7da6b1888c2eeac8ac8b9b05d3d3)
         """
-
         # Reset test results
         self.history = {"lr": [], "loss": []}
         self.best_loss = None
@@ -180,7 +178,7 @@ class LRFinder(object):
         elif step_mode.lower() == "linear":
             lr_schedule = LinearLR(self.optimizer, end_lr, num_iter)
         else:
-            raise ValueError("expected one of (exp, linear), got {}".format(step_mode))
+            raise ValueError(f"expected one of (exp, linear), got {step_mode}")
 
         if smooth_f < 0 or smooth_f >= 1:
             raise ValueError("smooth_f is outside the range [0, 1[")
@@ -219,8 +217,7 @@ class LRFinder(object):
             new_lrs = [new_lrs] * len(self.optimizer.param_groups)
         if len(new_lrs) != len(self.optimizer.param_groups):
             raise ValueError(
-                "Length of `new_lrs` is not equal to the number of parameter groups "
-                + "in the given optimizer"
+                "Length of `new_lrs` is not equal to the number of parameter groups " + "in the given optimizer"
             )
 
         for param_group, new_lr in zip(self.optimizer.param_groups, new_lrs):
@@ -232,6 +229,7 @@ class LRFinder(object):
                 raise RuntimeError("Optimizer already has a scheduler attached to it")
 
     def _train_batch(self, iter_wrapper, accumulation_steps):
+        """Trains one batch."""
         self.model.train()
         total_loss = None  # for late initialization
 
@@ -253,9 +251,7 @@ class LRFinder(object):
                 # https://nvidia.github.io/apex/advanced.html#gradient-accumulation-across-iterations
                 delay_unscale = ((i + 1) % accumulation_steps) != 0
 
-                with amp.scale_loss(
-                        loss, self.optimizer, delay_unscale=delay_unscale
-                ) as scaled_loss:
+                with amp.scale_loss(loss, self.optimizer, delay_unscale=delay_unscale) as scaled_loss:
                     scaled_loss.backward()
             else:
                 loss.backward()
@@ -270,6 +266,8 @@ class LRFinder(object):
         return total_loss.item()
 
     def _move_to_device(self, inputs, labels):
+        """Move inputs and labels to self.device."""
+
         def move(obj, device):
             if isinstance(obj, tuple):
                 return tuple(move(o, device) for o in obj)
@@ -285,6 +283,7 @@ class LRFinder(object):
         return inputs, labels
 
     def _validate(self, dataloader):
+        """Evaluate model for all inputs in $dataloader."""
         # Set model to evaluation mode and disable gradient computation
         running_loss = 0
         self.model.eval()
@@ -293,7 +292,7 @@ class LRFinder(object):
                 # Move data to the correct device
                 inputs, labels = self._move_to_device(inputs, labels)
 
-                if isinstance(inputs, tuple) or isinstance(inputs, list):
+                if isinstance(inputs, (tuple, list)):
                     batch_size = inputs[0].size(0)
                 else:
                     batch_size = inputs.size(0)
@@ -317,8 +316,10 @@ class LRFinder(object):
                 scale; otherwise, plotted in a linear scale. Default: True.
             show_lr (float, optional): is set, will add vertical line to visualize
                 specified learning rate; Default: None.
-        """
 
+        Raises:
+            ValueError: when input is invalid (read first lines in func)
+        """
         if skip_start < 0:
             raise ValueError("skip_start cannot be negative")
         if skip_end < 0:
@@ -350,8 +351,7 @@ class LRFinder(object):
 
 
 class LinearLR(lr_scheduler._LRScheduler):
-    """Linearly increases the learning rate between two boundaries over a number of
-    iterations.
+    """Linearly increases the learning rate between two boundaries over a number of iterations.
 
     Arguments:
         optimizer (torch.optim.Optimizer): wrapped optimizer.
@@ -363,7 +363,7 @@ class LinearLR(lr_scheduler._LRScheduler):
     def __init__(self, optimizer, end_lr, num_iter, last_epoch=-1):
         self.end_lr = end_lr
         self.num_iter = num_iter
-        super(LinearLR, self).__init__(optimizer, last_epoch)
+        super().__init__(optimizer, last_epoch)
 
     def get_lr(self):
         curr_iter = self.last_epoch + 1
@@ -372,8 +372,7 @@ class LinearLR(lr_scheduler._LRScheduler):
 
 
 class ExponentialLR(lr_scheduler._LRScheduler):
-    """Exponentially increases the learning rate between two boundaries over a number of
-    iterations.
+    """Exponentially increases the learning rate between two boundaries over a number of iterations.
 
     Arguments:
         optimizer (torch.optim.Optimizer): wrapped optimizer.
@@ -385,7 +384,7 @@ class ExponentialLR(lr_scheduler._LRScheduler):
     def __init__(self, optimizer, end_lr, num_iter, last_epoch=-1):
         self.end_lr = end_lr
         self.num_iter = num_iter
-        super(ExponentialLR, self).__init__(optimizer, last_epoch)
+        super().__init__(optimizer, last_epoch)
 
     def get_lr(self):
         curr_iter = self.last_epoch + 1
@@ -393,13 +392,12 @@ class ExponentialLR(lr_scheduler._LRScheduler):
         return [base_lr * (self.end_lr / base_lr) ** r for base_lr in self.base_lrs]
 
 
-class StateCacher(object):
+class StateCacher:
     def __init__(self, in_memory, cache_dir=None):
         self.in_memory = in_memory
         self.cache_dir = cache_dir
 
         if self.cache_dir is None:
-            import tempfile
 
             self.cache_dir = tempfile.gettempdir()
         else:
@@ -409,32 +407,30 @@ class StateCacher(object):
         self.cached = {}
 
     def store(self, key, state_dict):
+        """Save state in a pytorch file or in memory."""
         if self.in_memory:
             self.cached.update({key: copy.deepcopy(state_dict)})
         else:
-            fn = os.path.join(self.cache_dir, "state_{}_{}.pt".format(key, id(self)))
+            fn = os.path.join(self.cache_dir, f"state_{key}_{id(self)}.pt")
             self.cached.update({key: fn})
             torch.save(state_dict, fn)
 
     def retrieve(self, key):
+        """Retrieves state in a pytorch file or in memory."""
         if key not in self.cached:
-            raise KeyError("Target {} was not cached.".format(key))
+            raise KeyError(f"Target {key} was not cached.")
 
         if self.in_memory:
             return self.cached.get(key)
         else:
             fn = self.cached.get(key)
             if not os.path.exists(fn):
-                raise RuntimeError(
-                    "Failed to load state in {}. File doesn't exist anymore.".format(fn)
-                )
-            state_dict = torch.load(fn, map_location=lambda storage, location: storage)
+                raise RuntimeError(f"Failed to load state in {fn}. File doesn't exist anymore.")
+            state_dict = torch.load(fn, map_location=lambda storage, _location: storage)
             return state_dict
 
     def __del__(self):
-        """Check whether there are unused cached files existing in `cache_dir` before
-        this instance being destroyed."""
-
+        """Check whether there are unused cached files existing in `cache_dir` before this instance being destroyed."""
         if self.in_memory:
             return
 
@@ -443,9 +439,11 @@ class StateCacher(object):
                 os.remove(self.cached[k])
 
 
-class DataLoaderIterWrapper(object):
-    """A wrapper for iterating `torch.utils.data.DataLoader` with the ability to reset
-    itself while `StopIteration` is raised."""
+class DataLoaderIterWrapper:
+    """A wrapper for iterating `torch.utils.data.DataLoader`.
+
+    Has the ability to reset itself while `StopIteration` is raised.
+    """
 
     def __init__(self, data_loader, auto_reset=True):
         self.data_loader = data_loader
@@ -478,6 +476,4 @@ def apply_lr_finder(model: torch.Module):
     lr_finder = LRFinder(model, optimizer, criterion, device="cuda")
     lr_finder.range_test(trainloader, end_lr=100, num_iter=200)
     lr_finder.plot()  # to inspect the loss-learning rate graph
-    # lr_finder.range_test(trainloader, val_loader=model.val_dataloader(), end_lr=1, num_iter=100, step_mode="linear")
-    # lr_finder.plot(log_lr=False)
     lr_finder.reset()  # to reset the model and optimizer to their initial state

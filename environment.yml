@@ -7,11 +7,11 @@ channels:
 
 dependencies:
   - python=3.7
+  - pip
   # Core scientific python
   - numpy
   - matplotlib
   - seaborn
-  - pip
   - scikit-learn
   - scikit-image
 
@@ -35,10 +35,11 @@ dependencies:
   - holoviews
 
   - pip:
-      - tensorflow>=2.1.0  # for complete feature-set tensorboard, not strictly necessary
+      - tensorflow>=2.1.0 # for complete feature-set tensorboard, not strictly necessary
       - tensorboard>=2.1.0
       - panel
       - streamlit
       - argparse
       - pathos
       - jupyterthemes
+      - sqlfluff # for sql linting
