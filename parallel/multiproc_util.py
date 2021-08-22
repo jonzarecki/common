@@ -2,6 +2,7 @@ import itertools
 import logging
 import multiprocessing
 import sys
+import traceback
 from typing import Callable, Iterable, List
 
 from pathos.pools import ProcessPool as Pool
@@ -19,7 +20,7 @@ class LoggerWriter:
         self.level = level
 
     def write(self, message):
-        if message != '\n':
+        if message != "\n":
             self.level(message)
 
     def flush(self):
@@ -31,9 +32,13 @@ def _chunk_spawn_fun(args_list):
 
 
 def _spawn_fun(args):
-    input, func, proc_i, keep_child_tqdm = args
-    import random, numpy
+    """Internal function that spawned tqdm worked start from."""
+    f_input, func, proc_i, keep_child_tqdm = args
+    import random  # noqa
     import sys
+
+    import numpy
+
     old_err = sys.stderr
     if not keep_child_tqdm:
         sys.stderr = LoggerWriter()
@@ -43,10 +48,9 @@ def _spawn_fun(args):
     force_serial = True
 
     try:
-        res = func(input)
+        res = func(f_input)
         return res
-    except:
-        import traceback
+    except:  # noqa
         traceback.print_exc(file=sys.stdout)
         raise  # re-raise exception
     finally:
@@ -54,14 +58,13 @@ def _spawn_fun(args):
 
 
 def chunk_iterator(itr: Iterable, chunk_size: int) -> Iterable:
-    """
-    Returns the values of the iterator in chunks of size $chunk_size
+    """Returns the values of the iterator in chunks of size $chunk_size.
 
     Args:
         itr: The iterator we want to split into chunks
         chunk_size: The chunk size
 
-    Returns:
+    Yields:
         A new iterator which returns the values of $iter in chunks
     """
     itr = iter(itr)
@@ -79,10 +82,18 @@ def chunk_iterator(itr: Iterable, chunk_size: int) -> Iterable:
             return
 
 
-def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), force_parallel=False,
-           chunk_size=1, use_tqdm=False, keep_child_tqdm=True, **tqdm_kwargs) -> list:
-    """
-    Utility function for doing parallel calculations with multiprocessing.
+def parmap(  # noqa
+    f: Callable,
+    X: List[object],  # noqa, pylint: disable
+    nprocs=multiprocessing.cpu_count(),  # noqa
+    force_parallel=False,
+    chunk_size=1,
+    use_tqdm=False,
+    keep_child_tqdm=True,
+    **tqdm_kwargs
+) -> list:
+    """Utility function for doing parallel calculations with multiprocessing.
+
     Splits the parameters into chunks (if wanted) and calls.
     Equivalent to list(map(func, params_iter))
     Args:
@@ -91,6 +102,8 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
         chunk_size: Optional, the chunk size for the workers to work on
         nprocs: The number of procs to use (defaults for all cores)
         use_tqdm: Whether to use tqdm (default to False)
+        force_parallel: force parmap to run in parallel (even if force_serial=True)
+        keep_child_tqdm: Flag to indicate whether to keep children's processes tqdms active
         tqdm_kwargs: kwargs passed to tqdm
 
     Returns:
@@ -105,7 +118,8 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
 
     nprocs = int(max(1, min(nprocs, len(X) / chunk_size)))  # at least 1
     if len(X) < nprocs:
-        if nprocs != multiprocessing.cpu_count(): print("parmap too much procs")
+        if nprocs != multiprocessing.cpu_count():
+            print("parmap too much procs")
         nprocs = len(X)  # too much procs
 
     args = zip(X, [f] * len(X), range(len(X)), [keep_child_tqdm] * len(X))
@@ -126,12 +140,11 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
         p.restart(force=True)
         # can throw if current proc is daemon
         if use_tqdm:
-            retval_par = tqdm(p.imap(lambda arg: s_fun(arg), args), total=int(len(X) / chunk_size),
-                              **tqdm_kwargs)
+            retval_par = tqdm(
+                p.imap(lambda arg: s_fun(arg), args), total=int(len(X) / chunk_size), **tqdm_kwargs
+            )  # pylint: disable=unnecessary-lambda
         else:
-            # import  pdb
-            # pdb.set_trace()
-            retval_par = p.map(lambda arg: s_fun(arg), args)
+            retval_par = p.map(lambda arg: s_fun(arg), args)  # pylint: disable=unnecessary-lambda
 
         retval = list(retval_par)  # make it like the original map
         if chunk_size > 1:
@@ -141,7 +154,7 @@ def parmap(f: Callable, X: List[object], nprocs=multiprocessing.cpu_count(), for
         proc_count = old_proc_count
         global i
         i += 1
-    except AssertionError as e:
-        # if e == "daemonic processes are not allowed to have children":
+    except AssertionError:
+        # if e == "daemonic processes are not allowed to have children":  # noqa
         retval = list(map(f, tqdm(X, disable=not use_tqdm, **tqdm_kwargs)))  # can't have pool inside pool
     return retval

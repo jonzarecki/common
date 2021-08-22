@@ -1,4 +1,4 @@
-from common.sqlfluff_wrapper import apply_sqlfluff
+from lint.sqlfluff_wrapper import apply_sqlfluff
 
 my_bad_query = "SeLEct  *, 1, blah as  fOO \n" "  from myTable"
 my_good_query = """

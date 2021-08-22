@@ -1,4 +1,5 @@
 default_stages: [commit, manual]
+exclude: ^parallel.multiproc_util.py$
 repos:
   - repo: https://github.com/jorisroovers/gitlint
     rev: v0.15.1
