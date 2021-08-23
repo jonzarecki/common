@@ -1,17 +1,18 @@
+import os
 import warnings
 from collections import namedtuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import os
 
-__all__ = ['GoogLeNet', 'googlenet']
-
-
-_GoogLeNetOuputs = namedtuple('GoogLeNetOuputs', ['logits', 'aux_logits2', 'aux_logits1'])
+__all__ = ["GoogLeNet", "googlenet"]
 
 
-def googlenet(pretrained=False, progress=True, device='cpu', **kwargs):
+_GoogLeNetOuputs = namedtuple("GoogLeNetOuputs", ["logits", "aux_logits2", "aux_logits1"])
+
+
+def googlenet(pretrained=False, progress=True, device="cpu", **kwargs):
     r"""GoogLeNet (Inception v1) model architecture from
     `"Going Deeper with Convolutions" <http://arxiv.org/abs/1409.4842>`_.
 
@@ -26,7 +27,7 @@ def googlenet(pretrained=False, progress=True, device='cpu', **kwargs):
     model = GoogLeNet()
     if pretrained:
         script_dir = os.path.dirname(__file__)
-        state_dict = torch.load(script_dir + '/state_dicts/googlenet.pt', map_location=device)
+        state_dict = torch.load(script_dir + "/state_dicts/googlenet.pt", map_location=device)
         model.load_state_dict(state_dict)
     return model
 
@@ -35,21 +36,21 @@ class GoogLeNet(nn.Module):
 
     ## CIFAR10: aux_logits True->False
     def __init__(self, num_classes=10, aux_logits=False, transform_input=False):
-        super(GoogLeNet, self).__init__()
+        super().__init__()
         self.aux_logits = aux_logits
         self.transform_input = transform_input
-        
+
         ## CIFAR10: out_channels 64->192, kernel_size 7->3, stride 2->1, padding 3->1
         self.conv1 = BasicConv2d(3, 192, kernel_size=3, stride=1, padding=1)
-#         self.maxpool1 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
-#         self.conv2 = BasicConv2d(64, 64, kernel_size=1)
-#         self.conv3 = BasicConv2d(64, 192, kernel_size=3, padding=1)
-#         self.maxpool2 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
+        #         self.maxpool1 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
+        #         self.conv2 = BasicConv2d(64, 64, kernel_size=1)
+        #         self.conv3 = BasicConv2d(64, 192, kernel_size=3, padding=1)
+        #         self.maxpool2 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
         ## END
 
         self.inception3a = Inception(192, 64, 96, 128, 16, 32, 32)
         self.inception3b = Inception(256, 128, 128, 192, 32, 96, 64)
-        
+
         ## CIFAR10: padding 0->1, ciel_model True->False
         self.maxpool3 = nn.MaxPool2d(3, stride=2, padding=1, ceil_mode=False)
         ## END
@@ -59,11 +60,11 @@ class GoogLeNet(nn.Module):
         self.inception4c = Inception(512, 128, 128, 256, 24, 64, 64)
         self.inception4d = Inception(512, 112, 144, 288, 32, 64, 64)
         self.inception4e = Inception(528, 256, 160, 320, 32, 128, 128)
-        
+
         ## CIFAR10: kernel_size 2->3, padding 0->1, ciel_model True->False
         self.maxpool4 = nn.MaxPool2d(3, stride=2, padding=1, ceil_mode=False)
         ## END
-        
+
         self.inception5a = Inception(832, 256, 160, 320, 32, 128, 128)
         self.inception5b = Inception(832, 384, 192, 384, 48, 128, 128)
 
@@ -75,21 +76,21 @@ class GoogLeNet(nn.Module):
         self.dropout = nn.Dropout(0.2)
         self.fc = nn.Linear(1024, num_classes)
 
-#         if init_weights:
-#             self._initialize_weights()
+    #         if init_weights:
+    #             self._initialize_weights()
 
-#     def _initialize_weights(self):
-#         for m in self.modules():
-#             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-#                 import scipy.stats as stats
-#                 X = stats.truncnorm(-2, 2, scale=0.01)
-#                 values = torch.as_tensor(X.rvs(m.weight.numel()), dtype=m.weight.dtype)
-#                 values = values.view(m.weight.size())
-#                 with torch.no_grad():
-#                     m.weight.copy_(values)
-#             elif isinstance(m, nn.BatchNorm2d):
-#                 nn.init.constant_(m.weight, 1)
-#                 nn.init.constant_(m.bias, 0)
+    #     def _initialize_weights(self):
+    #         for m in self.modules():
+    #             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+    #                 import scipy.stats as stats
+    #                 X = stats.truncnorm(-2, 2, scale=0.01)
+    #                 values = torch.as_tensor(X.rvs(m.weight.numel()), dtype=m.weight.dtype)
+    #                 values = values.view(m.weight.size())
+    #                 with torch.no_grad():
+    #                     m.weight.copy_(values)
+    #             elif isinstance(m, nn.BatchNorm2d):
+    #                 nn.init.constant_(m.weight, 1)
+    #                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         if self.transform_input:
@@ -100,16 +101,16 @@ class GoogLeNet(nn.Module):
 
         # N x 3 x 224 x 224
         x = self.conv1(x)
-        
+
         ## CIFAR10
         # N x 64 x 112 x 112
-#         x = self.maxpool1(x)
+        #         x = self.maxpool1(x)
         # N x 64 x 56 x 56
-#         x = self.conv2(x)
+        #         x = self.conv2(x)
         # N x 64 x 56 x 56
-#         x = self.conv3(x)
+        #         x = self.conv3(x)
         # N x 192 x 56 x 56
-#         x = self.maxpool2(x)
+        #         x = self.maxpool2(x)
         ## END
 
         # N x 192 x 28 x 28
@@ -155,25 +156,22 @@ class GoogLeNet(nn.Module):
 
 
 class Inception(nn.Module):
-
     def __init__(self, in_channels, ch1x1, ch3x3red, ch3x3, ch5x5red, ch5x5, pool_proj):
-        super(Inception, self).__init__()
+        super().__init__()
 
         self.branch1 = BasicConv2d(in_channels, ch1x1, kernel_size=1)
 
         self.branch2 = nn.Sequential(
-            BasicConv2d(in_channels, ch3x3red, kernel_size=1),
-            BasicConv2d(ch3x3red, ch3x3, kernel_size=3, padding=1)
+            BasicConv2d(in_channels, ch3x3red, kernel_size=1), BasicConv2d(ch3x3red, ch3x3, kernel_size=3, padding=1)
         )
 
         self.branch3 = nn.Sequential(
-            BasicConv2d(in_channels, ch5x5red, kernel_size=1),
-            BasicConv2d(ch5x5red, ch5x5, kernel_size=3, padding=1)
+            BasicConv2d(in_channels, ch5x5red, kernel_size=1), BasicConv2d(ch5x5red, ch5x5, kernel_size=3, padding=1)
         )
 
         self.branch4 = nn.Sequential(
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1, ceil_mode=True),
-            BasicConv2d(in_channels, pool_proj, kernel_size=1)
+            BasicConv2d(in_channels, pool_proj, kernel_size=1),
         )
 
     def forward(self, x):
@@ -187,9 +185,8 @@ class Inception(nn.Module):
 
 
 class InceptionAux(nn.Module):
-
     def __init__(self, in_channels, num_classes):
-        super(InceptionAux, self).__init__()
+        super().__init__()
         self.conv = BasicConv2d(in_channels, 128, kernel_size=1)
 
         self.fc1 = nn.Linear(2048, 1024)
@@ -214,9 +211,8 @@ class InceptionAux(nn.Module):
 
 
 class BasicConv2d(nn.Module):
-
     def __init__(self, in_channels, out_channels, **kwargs):
-        super(BasicConv2d, self).__init__()
+        super().__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
         self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
 

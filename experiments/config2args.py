@@ -1,6 +1,6 @@
 import copy
 import sys
-from typing import Tuple, List
+from typing import List, Tuple
 
 import yaml
 
@@ -23,9 +23,9 @@ def extract_names_from_dict(d: dict, prefix="") -> List[Tuple[str, str]]:
 
 
 def convert_config_to_args():
-    if '--config' in sys.argv:
-        cfg_idx = sys.argv.index('--config')
-        yaml_cfg_path = sys.argv[cfg_idx+1]
+    if "--config" in sys.argv:
+        cfg_idx = sys.argv.index("--config")
+        yaml_cfg_path = sys.argv[cfg_idx + 1]
         with open(yaml_cfg_path) as f_in:
             cfg = yaml.safe_load(f_in)
 

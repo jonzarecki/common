@@ -8,10 +8,11 @@ import tempfile
 from distutils.dir_util import copy_tree
 from typing import List
 
-from common.constants import PROJECT_ROOT, _curr_time, STATE_DIR
-from .tee import Tee
+from common.constants import PROJECT_ROOT, STATE_DIR, _curr_time
 
-using_debugger = getattr(sys, 'gettrace', None)() is not None
+from experiments.tee import Tee
+
+using_debugger = getattr(sys, "gettrace", None)() is not None
 
 
 def save_all_py_files(folder_path, save_output=True):
@@ -28,11 +29,10 @@ def save_all_py_files(folder_path, save_output=True):
     for ext in ["py", "yaml"]:  # copy all files with relevant extension
         python_files_in_dir = list_all_files_in_folder(PROJECT_ROOT, ext, recursively=True)
         copy_files_while_keeping_structure(python_files_in_dir, PROJECT_ROOT, python_files_path)
-    with open(f"{python_files_path}/runscript.txt", 'w') as f:
-        f.write(' '.join([runfile_name] + sys.argv[1:]))
+    with open(f"{python_files_path}/runscript.txt", "w") as f:
+        f.write(" ".join([runfile_name] + sys.argv[1:]))
     print(f"files saved in: \n {python_files_path}")
     return _curr_time
-
 
 
 def shuffle_rows(in_filename, out_filename):
@@ -44,10 +44,10 @@ def shuffle_rows(in_filename, out_filename):
     :type out_filename: str
     :return: None
     """
-    with open(in_filename, 'r') as source:
+    with open(in_filename) as source:
         data = [(random.random(), line) for line in source]
     data.sort()
-    with open(out_filename, 'w') as target:
+    with open(out_filename, "w") as target:
         for _, line in data:
             target.write(line)
 
@@ -63,12 +63,12 @@ def merge_similar_rows(in_filename, out_filename):
     """
     lines_seen = set()  # holds lines already seen
     out_lines = []
-    with open(in_filename, 'r') as in_file:
+    with open(in_filename) as in_file:
         for line in in_file:
             if line not in lines_seen:  # not a duplicate
                 out_lines.append(line)
                 lines_seen.add(line)
-    with open(out_filename, 'w') as out_file:
+    with open(out_filename, "w") as out_file:
         for line in out_lines:
             out_file.write(line)
 
@@ -76,7 +76,7 @@ def merge_similar_rows(in_filename, out_filename):
 def create_temp_folder(prefix=None):
     """
     creates a new temporary directory and returns it's path
-    :param prefix: the prefix for the temp folder 
+    :param prefix: the prefix for the temp folder
     :return: full path of the new directory
     """
     if prefix is not None:
@@ -128,9 +128,9 @@ def makedirs(folder_path, exists_ok=True):
 
 def list_all_files_in_folder(fold_abspath, file_ext, recursively=True) -> List[str]:
     if recursively:
-        file_list = list(pathlib.Path(fold_abspath).glob('**/*.' + file_ext))
+        file_list = list(pathlib.Path(fold_abspath).glob("**/*." + file_ext))
     else:
-        file_list = list(pathlib.Path(fold_abspath).glob('*.' + file_ext))
+        file_list = list(pathlib.Path(fold_abspath).glob("*." + file_ext))
     return [str(p) for p in file_list]
 
 
@@ -141,13 +141,12 @@ def copy_file(file_path, dst_dir):
 def copy_files_while_keeping_structure(files_path_list, orig_dir, dst_dir):
     # copy all files to their correct structure in dst_dir
     for file_path in files_path_list:
-        file_dst_parent = os.path.join(dst_dir,
-                                       str(pathlib.PosixPath(file_path).relative_to(orig_dir).parent))
+        file_dst_parent = os.path.join(dst_dir, str(pathlib.PosixPath(file_path).relative_to(orig_dir).parent))
         makedirs(file_dst_parent)
         copy_file(file_path, file_dst_parent)
 
 
 def readlines(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path) as f:
         file_lines = f.read().splitlines()
     return file_lines

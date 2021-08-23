@@ -1,7 +1,7 @@
 import multiprocessing
 import pickle as pkl
-import traceback
 import time
+import traceback
 from os.path import basename
 from typing import Dict
 
@@ -10,7 +10,7 @@ total_waiting_time = 250
 par_loaded_objs = list()  # global list for all waiting objs
 
 
-class ParallelLoad(object):
+class ParallelLoad:
     def __init__(self, loading_fun=None, pkl_path=None):
         self.model = None
         self.return_queue = None
@@ -19,11 +19,13 @@ class ParallelLoad(object):
         par_loaded_objs.append(self)
         if pkl_path is not None:
             self.pkl_path = pkl_path
-            self.p = multiprocessing.Process(args=(self.pkl_path, self.ret_dict),
-                                             target=lambda pth, d: d.__setitem__(1, self.load_pickle(pth)))
+            self.p = multiprocessing.Process(
+                args=(self.pkl_path, self.ret_dict), target=lambda pth, d: d.__setitem__(1, self.load_pickle(pth))
+            )
         else:  # loading_fun is not None
-            self.p = multiprocessing.Process(args=(loading_fun, self.ret_dict),
-                                             target=lambda f, d: d.__setitem__(1, f()))
+            self.p = multiprocessing.Process(
+                args=(loading_fun, self.ret_dict), target=lambda f, d: d.__setitem__(1, f())
+            )
         self.p.start()
 
     @property
@@ -53,7 +55,7 @@ class ParallelLoad(object):
             sa = time.time()
             pkl_fname = basename(pkl_path)
             print("loading " + pkl_path)
-            with open(pkl_path, 'rb') as f:
+            with open(pkl_path, "rb") as f:
                 retval = pkl.load(f)
         except Exception:
             traceback.print_exc()

@@ -1,11 +1,12 @@
-import torch.nn as nn
 from collections import OrderedDict
+
+import torch.nn as nn
 
 
 class MLP(nn.Module):
     def __init__(self, input_dims, n_hiddens):
-        super(MLP, self).__init__()
-        assert isinstance(input_dims, int), 'Please provide int for input_dims'
+        super().__init__()
+        assert isinstance(input_dims, int), "Please provide int for input_dims"
         self.input_dims = input_dims
         current_dims = input_dims
         layers = OrderedDict()
@@ -15,9 +16,9 @@ class MLP(nn.Module):
         else:
             n_hiddens = list(n_hiddens)
         for i, n_hidden in enumerate(n_hiddens):
-            layers['fc{}'.format(i+1)] = nn.Linear(current_dims, n_hidden)
-            layers['relu{}'.format(i+1)] = nn.ReLU()
-            layers['drop{}'.format(i+1)] = nn.Dropout(0.2)
+            layers[f"fc{i + 1}"] = nn.Linear(current_dims, n_hidden)
+            layers[f"relu{i + 1}"] = nn.ReLU()
+            layers[f"drop{i + 1}"] = nn.Dropout(0.2)
             current_dims = n_hidden
 
         self.model = nn.Sequential(layers)
