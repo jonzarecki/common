@@ -8,7 +8,7 @@ from typing import Callable, Iterable, List
 from pathos.pools import ProcessPool as Pool
 from tqdm.autonotebook import tqdm
 
-from common.itertools import flatten
+from common.itertools_ext import flatten
 
 i = 0
 proc_count = 1
