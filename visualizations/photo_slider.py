@@ -8,7 +8,6 @@ from bokeh.models.glyphs import ImageURL
 from bokeh.plotting import figure
 from bokeh.plotting import show
 
-# from coord2vec.models.data_loading.tile_features_loader import TileFeaturesDataset
 TileFeaturesDataset = None
 from tqdm import trange
 from PIL import Image
@@ -93,7 +92,7 @@ def multi_channel_tile_slider(dataset: TileFeaturesDataset):
 
     update_source_str = """
 
-        var data = source{i}.data;    
+        var data = source{i}.data;
         url = data['url']
         url_orig = data['url_orig']
         for (i = 0; i < url_orig.length; i++) {
