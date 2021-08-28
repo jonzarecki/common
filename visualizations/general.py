@@ -66,20 +66,23 @@ def show_ndarray_in_matplotlib(img: np.ndarray):
     img.show()
 
 
-def plot_hv_multi_line_curve(curves: List[List[float]], title: str) -> hv.Curve:
+def plot_hv_multi_line_curve(curves: List[List[float]], title: str, labels: List[str] = ()) -> hv.Curve:
     """Plots a multi line curve with holoviews.
 
     Args:
         curves:  List of lists (of the same length!) with points on the curves
         title: Plot title
+        labels: List of labels for the curves
 
     Returns:
         a holoviews curve object
     """
     assert all(len(curves[0]) == len(curv) for curv in curves), "all curves should be of the same length " \
                                                                 "(have the same x axis)"
-    curv_plt = hv.Curve(curves[0])
-    for curv in curves[1:]:
-        curv_plt *= hv.Curve(curv)
+    labels = [None] * len(curves) if len(labels) == 0 else labels
 
-    return curv_plt.opts(fontscale=1, width=500, height=400, title=title, toolbar='above')
+    curv_plt = hv.Curve(curves[0], label=labels[0])
+    for i, curv in enumerate(curves[1:]):
+        curv_plt *= hv.Curve(curv, label=labels[i + 1])
+
+    return curv_plt.opts(fontscale=1, width=500, height=400, title=title, toolbar='above', legend_position='top_left')
