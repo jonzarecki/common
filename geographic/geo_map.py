@@ -6,9 +6,11 @@ import geopandas as gpd
 import numpy as np
 from cachetools import cached, LRUCache
 from folium.features import FeatureGroup
+from folium.plugins import MeasureControl
 from matplotlib import colors
 from pandas import DataFrame
 from shapely import wkt
+from shapely.geometry import Point
 from shapely.wkt import loads
 
 from common.geographic.folium_extensions import NoClickGeoJson
@@ -44,25 +46,29 @@ class GeoMap:
     this class is depends on the modules: folium for the map and geomet to parse wkt
     """
 
-    def __init__(self, start_location: List[float], start_zoom: int = 11, layer_control=True):
-        """
-            Args:
-                start_location (Array[int,int],default=True)
-                    the map will open with this geographic position as the center
+    def __init__(self, start_location: Point, start_zoom: int = 11, layer_control=True, measure_control=False):
+        """Build GeoMap
 
-                start_zoom (int, default=True)
-                    the map will be initialized with this zoom (range between 0-15)
+        Args:
+            start_location
+                the map will open with this geographic position as the center
 
-                layer_control: weather to see a layer choice or not
+            start_zoom (int, default=True)
+                the map will be initialized with this zoom (range between 0-15)
+
+            layer_control: weather to see a layer choice or not
+
+            measure_control: weather to see a distance measure control or not
         """
         self.start_location = start_location
         self.start_zoom = start_zoom
         self.layer_control = layer_control
+        self.measure_control = measure_control
         self._get_folium_map()
 
     def _get_folium_map(self):
 
-        self.map = folium.Map(location=self.start_location, zoom_start=self.start_zoom)
+        self.map = folium.Map(location=(self.start_location.y, self.start_location.x), zoom_start=self.start_zoom)
 
     def clear_map(self):
         """
@@ -81,6 +87,9 @@ class GeoMap:
         """
         if self.layer_control:
             folium.LayerControl().add_to(self.map)
+        if self.measure_control:
+            MeasureControl().add_to(self.map)
+
         return self.map
 
     def save(self, path: str):
@@ -90,58 +99,6 @@ class GeoMap:
         """
         self.map.save(path)
 
-    def show_wkt_layer_from_dataframe(self, df: DataFrame, geo_col: str, color: Union[str, List[str]] = '#0078d7'):
-        """shows the map with the geometries on it.
-
-        Args:
-            df (Pandas dataframe,default=False)
-                dataframe with at least one geographic column
-
-            geo_col (str,default=False)
-                the name of the geometry column to show
-                the geometries should be in the format of wkt string
-                if you are using oracle, select the sdo_geometry with the oracle function sdo_util.to_wktgeometry
-
-               color (str,default=True)
-                the color to use when drawing the geoms on the map
-                examples - blue,white,#0078d7, #9999d9
-
-        Returns:
-            shows the map with the geometries on it
-        """
-        self.load_wkt_layer_from_dataframe(df, geo_col, color)
-        return self.show()
-
-    def show_geo_pandas_json_layer(self, geo_pandas_json: str):
-        """
-        shows the map with the geometries on it
-
-        Args:
-                geo_pandas_json (Text,default=False)
-                    GeoDataFrame converted to json
-
-        Returns:
-            shows the map with the geometries on it
-        """
-
-        self.load_geo_pandas_json_layer(geo_pandas_json)
-        return self.show()
-
-    def load_geo_pandas_json_layer(self, geo_pandas_json: str):
-        """
-        shows the map with the geometries on it
-
-        Args:
-                geo_pandas_json (Text,default=False)
-                    GeoDataFrame converted to json
-
-        Returns:
-            loads the map with the geometries on it
-        """
-
-        geoms = folium.features.GeoJson(geo_pandas_json)
-        self.map.add_children(geoms)
-
     def load_wkt_layer_from_dataframe(self, df: DataFrame, wkt_column_name: str,
                                       color: Union[str, List[str]] = '#0078d7',
                                       fill_color: Union[str, List[str]] = '#0048a7',
@@ -149,40 +106,41 @@ class GeoMap:
                                       group_name=None,
                                       change_bounds_on_click=False,
                                       pop_up: bool = True):
-        """
-        loads additional layer to the map
+        """Loads additional layer to the map.
 
         Args:
-                df (Pandas dataframe,default=False)
-                    dataframe with at least one geographic column
+            df (Pandas dataframe,default=False)
+                dataframe with at least one geographic column
 
-                wkt_column_name (str,default=False)
-                    the name of the geometry column to show
-                    the geometries should be in the format of wkt string
-                    if you are using oracle, select the sdo_geometry with the oracle function sdo_util.to_wktgeometry
+            wkt_column_name (str,default=False)
+                the name of the geometry column to show
+                the geometries should be in the format of wkt string
+                if you are using oracle, select the sdo_geometry with the oracle function sdo_util.to_wktgeometry
 
-                color (str,default=True)
-                    the color to use when drawing the geoms on the map
-                    examples - blue,white,#0078d7, #9999d9
+            color (str,default=True)
+                the color to use when drawing the geoms on the map
+                examples - blue,white,#0078d7, #9999d9
 
-                fill_color(str,default=True)
-                    the color to fill when its complex geometry as polygon
+            fill_color(str,default=True)
+                the color to fill when its complex geometry as polygon
 
-                fill_alpha(float)
-                    the opacity of the fill color, between 0 and 1
+            fill_alpha(float)
+                the opacity of the fill color, between 0 and 1
 
-                group_name: (str,default=None)
-                    will take geometries and create a group in the LayerControl, gives a specific name for the group.
-                    If None then does'nt group the geometries.
+            group_name: (str,default=None)
+                will take geometries and create a group in the LayerControl, gives a specific name for the group.
+                If None then does'nt group the geometries.
 
-                change_bounds_on_click: whether a mouse-click on change the map bounds to the object
+            change_bounds_on_click: whether a mouse-click on change the map bounds to the object
 
-                pop_up: whether a mouse-click on the object will pop-up
+            pop_up: whether a mouse-click on the object will pop-up
         """
         part_func = lambda x, color_index: {'color': color[color_index] if type(color) is not str else color,  # noqa
                                             'fillColor': fill_color[color_index] if type(
                                                 fill_color) is not str else fill_color,
-                                            'fillOpacity': fill_alpha}
+                                            'fillOpacity': fill_alpha,
+                                            'markerColor': color[color_index] if type(color) is not str else color,
+                                            'icon_color': color[color_index] if type(color) is not str else color}
 
         object_to_add = self.map
         if group_name is not None:
@@ -212,36 +170,35 @@ class GeoMap:
                                           color: Union[str, List[str]] = '#0078d7', line_alpha: float = 1,
                                           fill_color: Union[str, List[str]] = '#0048a7',
                                           fill_alpha: float = 0.2, name=None):
-        """
-        loads additional layer to the map
+        """Loads additional layer to the map.
 
         Args:
-                df (Pandas dataframe,default=False)
-                    dataframe with at least one geographic column
+            df (Pandas dataframe,default=False)
+                dataframe with at least one geographic column
 
-                wkt_column_name (str,default=False)
-                    the name of the geometry column to show
-                    the geometries should be in the format of wkt string
-                    if you are using oracle, select the sdo_geometry with the oracle function sdo_util.to_wktgeometry
+            wkt_column_name (str,default=False)
+                the name of the geometry column to show
+                the geometries should be in the format of wkt string
+                if you are using oracle, select the sdo_geometry with the oracle function sdo_util.to_wktgeometry
 
-                step (float,default=1)
-                    resolution of sample in meters
+            step (float,default=1)
+                resolution of sample in meters
 
-                color (str,default=True)
-                    the color to use when drawing the geoms on the map
-                    examples - blue,white,#0078d7, #9999d9
+            color (str,default=True)
+                the color to use when drawing the geoms on the map
+                examples - blue,white,#0078d7, #9999d9
 
-                fill_color(str,default=True)
-                    the color to fill when its complex geometry as polygon
+            fill_color(str,default=True)
+                the color to fill when its complex geometry as polygon
 
-                fill_alpha(float)
-                    the opacity of the fill color, between 0 and 1
+            fill_alpha(float)
+                the opacity of the fill color, between 0 and 1
 
-                name: (str,default=None)
-                    gives a specific name for the image_overlay
+            name: (str,default=None)
+                gives a specific name for the image_overlay
 
-                line_alpha:
-                    the opacity of the line color, between 0 and 1
+            line_alpha:
+                the opacity of the line color, between 0 and 1
         """
         gds = gpd.GeoSeries(df[wkt_column_name].map(wkt.loads))
 
@@ -256,8 +213,6 @@ class GeoMap:
 
         image_overlay.add_to(self.map)
 
-    def __call__(self, *args, **kwargs):
-        """
-        to easily show the map just apply the object
-        """
+    def __call__(self):
+        """To easily show the map just apply the object."""
         return self.show()
