@@ -17,8 +17,3 @@ General utils I use for every project
    - Install pre-commit in your **local** environment (`pip install pre-commit`)
    - Run `pre-commit install --install-hooks -t pre-commit -t commit-msg`
    - Hooks are built and tested in `https://github.com/jonzarecki/pre-commit-checks`
-
-### TODO
-
-- [ ] Add DB utils
-- [ ] Add Geographic utils
