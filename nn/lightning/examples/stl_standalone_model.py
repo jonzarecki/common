@@ -5,13 +5,13 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-from pytorch_lightning import LightningModule
-from torch import optim
-from torch.utils.data import DataLoader
 
 # define lightning model
 from common.constants import DATA_LONG_TERM_DIR
 from common.nn.models.image.resnet import ResNet18
+from pytorch_lightning import LightningModule
+from torch import optim
+from torch.utils.data import DataLoader
 
 
 class ExampleStandAloneModel(LightningModule):

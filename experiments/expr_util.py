@@ -1,7 +1,7 @@
 import os
 import sys
 
-from common.constants import PROJECT_ROOT, _curr_time, STATE_DIR
-from .file_util import list_all_files_in_folder, copy_files_while_keeping_structure
-from .tee import Tee
+from common.constants import PROJECT_ROOT, STATE_DIR, _curr_time
 
+from experiments.file_util import copy_files_while_keeping_structure, list_all_files_in_folder
+from experiments.tee import Tee

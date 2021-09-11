@@ -1,10 +1,10 @@
 import math
 
 import torch
-from torch.nn.parameter import Parameter
 import torch.nn.functional as F
-from torch.nn import init, Module
 from torch import nn
+from torch.nn import Module, init
+from torch.nn.parameter import Parameter
 
 
 class MultiHeadLinear(Module):
@@ -40,10 +40,10 @@ class MultiHeadLinear(Module):
         >>> print(output.size())
         torch.Size([128, 30])
     """
-    __constants__ = ['bias', 'in_features', 'out_features']
+    __constants__ = ["bias", "in_features", "out_features"]
 
     def __init__(self, in_features, out_features, n_heads, bias=True):
-        super(MultiHeadLinear, self).__init__()
+        super().__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.n_heads = n_heads
@@ -51,7 +51,7 @@ class MultiHeadLinear(Module):
         if bias:
             self.bias = Parameter(torch.Tensor(n_heads, out_features))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -66,14 +66,14 @@ class MultiHeadLinear(Module):
         return F.linear(input, self.weight, self.bias)
 
     def extra_repr(self):
-        return 'in_features={}, out_features={}, bias={}'.format(
+        return "in_features={}, out_features={}, bias={}".format(
             self.in_features, self.out_features, self.bias is not None
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     t = torch.rand((10, 3))
     h = MultiHeadLinear(3, 5, 6)
     h.reset_parameters()
     res = h.forward(t)
-    a=1
+    a = 1

@@ -1,34 +1,30 @@
 import torch
 import torch.nn as nn
-
-
+from common.constants import MODEL_LONG_TERM_DIR
 from transformers import BertModel
 
-from common.constants import MODEL_LONG_TERM_DIR
 
 class BertGRU(nn.Module):
-    def __init__(self,
-                 hidden_dim=256,
-                 output_dim=256,
-                 n_layers=2,
-                 bidirectional=True,
-                 dropout=0.25):
+    def __init__(self, hidden_dim=256, output_dim=256, n_layers=2, bidirectional=True, dropout=0.25):
 
         super().__init__()
-        self.bert = BertModel.from_pretrained('bert-base-uncased', cache_dir=f"{MODEL_LONG_TERM_DIR}/bert-base-uncased/")
+        self.bert = BertModel.from_pretrained(
+            "bert-base-uncased", cache_dir=f"{MODEL_LONG_TERM_DIR}/bert-base-uncased/"
+        )
         # don't train bert params
         # for name, param in self.bert.named_parameters():
         #     param.requires_grad = False
 
+        embedding_dim = self.bert.config.to_dict()["hidden_size"]
 
-        embedding_dim = self.bert.config.to_dict()['hidden_size']
-
-        self.rnn = nn.GRU(embedding_dim,
-                          hidden_dim,
-                          num_layers=n_layers,
-                          bidirectional=bidirectional,
-                          batch_first=True,
-                          dropout=0 if n_layers < 2 else dropout)
+        self.rnn = nn.GRU(
+            embedding_dim,
+            hidden_dim,
+            num_layers=n_layers,
+            bidirectional=bidirectional,
+            batch_first=True,
+            dropout=0 if n_layers < 2 else dropout,
+        )
 
         self.out = nn.Linear(hidden_dim * 2 if bidirectional else hidden_dim, output_dim)
 

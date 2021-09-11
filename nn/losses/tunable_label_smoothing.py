@@ -6,16 +6,15 @@ import torch.nn.functional as F
 
 class TunableLabelSmoothingCrossEntropy(nn.Module):
     def __init__(self, total_smooth_capacity=0.1, uniform_smooth=False, ce=False):
-        super(TunableLabelSmoothingCrossEntropy, self).__init__()
+        super().__init__()
         self.uniform_smooth = uniform_smooth
         self.ce = ce
         # assert total_smooth_capacity <= 0.5, "smooth is too large"
         self.total_smooth_capacity = total_smooth_capacity
 
-
     def forward(self, y_pred: torch.Tensor, target: torch.Tensor, per_cls_smooth: torch.Tensor) -> torch.Tensor:
         assert per_cls_smooth.shape == y_pred.shape, "smoothing values should match each cell in y_pred"
-        confidence = 1. - self.total_smooth_capacity
+        confidence = 1.0 - self.total_smooth_capacity
         per_cls_smooth = per_cls_smooth.to(y_pred.device) * self.total_smooth_capacity
 
         logprobs = F.log_softmax(y_pred, dim=-1)

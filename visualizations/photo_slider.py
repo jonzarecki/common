@@ -1,16 +1,14 @@
 import os
 
 import numpy as np
-from bokeh.layouts import column
-from bokeh.layouts import row
-from bokeh.models import CustomJS, ColumnDataSource, Slider
+from bokeh.layouts import column, row
+from bokeh.models import ColumnDataSource, CustomJS, Slider
 from bokeh.models.glyphs import ImageURL
-from bokeh.plotting import figure
-from bokeh.plotting import show
+from bokeh.plotting import figure, show
 
 TileFeaturesDataset = None
-from tqdm import trange
 from PIL import Image
+from tqdm import trange
 
 
 def _disable_all_for_pictures(p):
@@ -23,8 +21,8 @@ def _disable_all_for_pictures(p):
     p.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
     p.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
     p.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
-    p.xaxis.major_label_text_font_size = '0pt'  # preferred method for removing tick labels
-    p.yaxis.major_label_text_font_size = '0pt'  # preferred method for removing tick labels
+    p.xaxis.major_label_text_font_size = "0pt"  # preferred method for removing tick labels
+    p.yaxis.major_label_text_font_size = "0pt"  # preferred method for removing tick labels
 
     return p
 
@@ -42,7 +40,7 @@ def _save_tile_images_to_local_path(dataset: TileFeaturesDataset, max_photos=Non
         img_b = dataset[i][0][1]
         img_c = dataset[i][0][2]
 
-        a_img_p, b_img_p, c_img_p = f'pics/{i}-A.png', f'pics/{i}-B.png', f'pics/{i}-C.png'
+        a_img_p, b_img_p, c_img_p = f"pics/{i}-A.png", f"pics/{i}-B.png", f"pics/{i}-C.png"
 
         def save_to_png(img_channel, p):
             data = np.random.randint(5, size=(224, 224), dtype=np.uint8)
@@ -80,9 +78,9 @@ def multi_channel_tile_slider(dataset: TileFeaturesDataset):
         p = figure(height=300, width=300)
         img_paths = pathes[i]
         # print(img_paths)
-        source = ColumnDataSource(data=dict(url=[img_paths[0]] * n,
-                                            url_orig=img_paths,
-                                            x=[1] * n, y=[1] * n, w=[1] * n, h=[1] * n))
+        source = ColumnDataSource(
+            data=dict(url=[img_paths[0]] * n, url_orig=img_paths, x=[1] * n, y=[1] * n, w=[1] * n, h=[1] * n)
+        )
         image = ImageURL(url="url", x="x", y="y", w="w", h="h", anchor="bottom_left")
         p.add_glyph(source, glyph=image)
         _disable_all_for_pictures(p)
@@ -102,13 +100,16 @@ def multi_channel_tile_slider(dataset: TileFeaturesDataset):
 
     """
     # the callback
-    callback = CustomJS(args=dict(source0=sources[0], source1=sources[1], source2=sources[2]), code=f"""
+    callback = CustomJS(
+        args=dict(source0=sources[0], source1=sources[1], source2=sources[2]),
+        code=f"""
         var f = cb_obj.value;
         console.log(f)
         {"".join([update_source_str.replace('{i}', str(i)) for i in range(plot_num)])}
-    """)
+    """,
+    )
     slider = Slider(start=1, end=n, value=1, step=1, title="example number")
-    slider.js_on_change('value', callback)
+    slider.js_on_change("value", callback)
 
     column_layout = [slider]
     curr_row = []

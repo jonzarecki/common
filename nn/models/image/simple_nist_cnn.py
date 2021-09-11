@@ -1,10 +1,9 @@
-from torch import nn
-import torch
-from torchvision import datasets, transforms
-from torch import nn, optim
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+import torch.nn.functional as F
+from torch import nn, optim
+from torchvision import datasets, transforms
 
 
 class Flatten(nn.Module):
@@ -13,6 +12,7 @@ class Flatten(nn.Module):
     # Arguments
         input: Input tensor
     """
+
     def forward(self, input):
         return input.view(input.size(0), -1)
 
@@ -27,18 +27,12 @@ def conv_block(in_channels: int, out_channels: int) -> nn.Module:
         nn.Conv2d(in_channels, out_channels, 3, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2)
+        nn.MaxPool2d(kernel_size=2, stride=2),
     )
-
 
 
 def build_model(class_num):
-    return nn.Sequential(
-        conv_block(1, 16),
-        conv_block(16, 8),
-        Flatten(),
-        nn.Linear(128, class_num)
-    )
+    return nn.Sequential(conv_block(1, 16), conv_block(16, 8), Flatten(), nn.Linear(128, class_num))
 
 
 class CNN(nn.Module):
@@ -51,11 +45,13 @@ class CNN(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 10, 5,
-                               stride=1)  # Applies a 1D convolution over an input signal composed of several input planes
+        self.conv1 = nn.Conv2d(
+            1, 10, 5, stride=1
+        )  # Applies a 1D convolution over an input signal composed of several input planes
         self.maxp = nn.MaxPool2d(2, 2)  # MaxPool function
-        self.conv2 = nn.Conv2d(10, 50, 5,
-                               stride=1)  # Applies a 1D convolution over an input signal composed of several input planes
+        self.conv2 = nn.Conv2d(
+            10, 50, 5, stride=1
+        )  # Applies a 1D convolution over an input signal composed of several input planes
         self.fc1 = nn.Linear(800, 256)  # the Linear value change to 256
 
     def forward(self, x):

@@ -1,6 +1,7 @@
+from typing import List
+
 import numpy as np
 import sklearn
-from typing import List
 
 
 def silhouette_score(embeddings: np.ndarray, label_assignments: List[int]) -> float:
@@ -11,5 +12,5 @@ def silhouette_score(embeddings: np.ndarray, label_assignments: List[int]) -> fl
     """
     assert len(embeddings) == len(label_assignments), "should be of the same length"
     if len(np.unique(label_assignments)) == 1:
-        return -1.  # sklearn impl would fail
+        return -1.0  # sklearn impl would fail
     return sklearn.metrics.silhouette_score(embeddings, label_assignments)
