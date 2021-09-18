@@ -185,10 +185,3 @@ repos:
     hooks:
       - id: prettier
         exclude: .(cruft|cookiecutter).json
-
-  - repo: https://github.com/jonzarecki/cruft
-    rev: 2.9.0-alpha.3
-    hooks:
-      - id: cruft
-        always_run: true
-        stages: [push]
