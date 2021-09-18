@@ -78,6 +78,7 @@ repos:
         exclude: ^notebooks.*$
         additional_dependencies:
           - attrs
+          - types-toml
           - types-requests
 
   - repo: https://github.com/myint/docformatter
