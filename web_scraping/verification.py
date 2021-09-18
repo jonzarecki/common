@@ -11,7 +11,6 @@ def assert_request_is_working(
     data: Optional[Dict[str, str]] = None,
 ) -> None:
     """Assert the website works with the data given, and return response 200."""
-    # TODO: add tests
     if is_get:
         assert data is None, "can't pass data in get request"
         r = requests.get(url, headers=headers, cookies=cookies)
