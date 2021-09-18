@@ -1,9 +1,10 @@
 import itertools
 import logging
+import math
 import multiprocessing
 import sys
 import traceback
-from typing import Callable, Iterable, List
+from typing import Callable, Iterable, Sized, Tuple, List, Any, Dict, Iterator
 
 from pathos.pools import ProcessPool as Pool
 from tqdm.autonotebook import tqdm
@@ -16,22 +17,22 @@ force_serial = False
 
 
 class LoggerWriter:
-    def __init__(self, level=logging.debug):
+    def __init__(self, level: Callable = logging.debug):  # type: ignore
         self.level = level
 
-    def write(self, message):
+    def write(self, message: str) -> None:
         if message != "\n":
             self.level(message)
 
-    def flush(self):
+    def flush(self) -> None:
         self.level(sys.stderr)
 
 
-def _chunk_spawn_fun(args_list):
+def _chunk_spawn_fun(args_list: Iterable[Tuple[Any, Callable[[Any], Any], int, bool]]) -> List[Any]:
     return [_spawn_fun(args) for args in args_list]
 
 
-def _spawn_fun(args):
+def _spawn_fun(args: Tuple[Any, Callable[[Any], Any], int, bool]) -> Any:
     """Internal function that spawned tqdm worked start from."""
     f_input, func, proc_i, keep_child_tqdm = args
     import random  # noqa
@@ -41,7 +42,7 @@ def _spawn_fun(args):
 
     old_err = sys.stderr
     if not keep_child_tqdm:
-        sys.stderr = LoggerWriter()
+        sys.stderr = LoggerWriter()  # type: ignore
     random.seed(1554 + proc_i)
     numpy.random.seed(42 + proc_i)  # set random seeds
     global force_serial
@@ -57,7 +58,7 @@ def _spawn_fun(args):
         sys.stderr = old_err
 
 
-def chunk_iterator(itr: Iterable, chunk_size: int) -> Iterable:
+def chunk_iterator(itr: Iterable[Any], chunk_size: int) -> Iterator[List[Any]]:
     """Returns the values of the iterator in chunks of size $chunk_size.
 
     Args:
@@ -83,15 +84,15 @@ def chunk_iterator(itr: Iterable, chunk_size: int) -> Iterable:
 
 
 def parmap(  # noqa
-    f: Callable,
-    X: List[object],  # noqa, pylint: disable
-    nprocs=multiprocessing.cpu_count(),  # noqa
-    force_parallel=False,
-    chunk_size=1,
-    use_tqdm=False,
-    keep_child_tqdm=True,
-    **tqdm_kwargs
-) -> list:
+    f: Callable[[Any], Any],
+    X: Sized,  # pylint: disable
+    nprocs: int = multiprocessing.cpu_count(),  # noqa
+    force_parallel: bool = False,
+    chunk_size: int = 1,
+    use_tqdm: bool = False,
+    keep_child_tqdm: bool = True,
+    **tqdm_kwargs: Dict[str, Any]
+) -> List[Any]:
     """Utility function for doing parallel calculations with multiprocessing.
 
     Splits the parameters into chunks (if wanted) and calls.
@@ -116,18 +117,18 @@ def parmap(  # noqa
     if nprocs != multiprocessing.cpu_count() and len(X) < nprocs * chunk_size:
         chunk_size = 1  # use chunk_size = 1 if there is enough procs for a batch size of 1
 
-    nprocs = int(max(1, min(nprocs, len(X) / chunk_size)))  # at least 1
+    nprocs = int(max(1, min(nprocs, math.floor(len(X) / chunk_size))))  # at least 1
     if len(X) < nprocs:
         if nprocs != multiprocessing.cpu_count():
             print("parmap too much procs")
         nprocs = len(X)  # too much procs
 
-    args = zip(X, [f] * len(X), range(len(X)), [keep_child_tqdm] * len(X))
+    args = zip(X, [f] * len(X), range(len(X)), [keep_child_tqdm] * len(X))  # type: ignore
     if chunk_size > 1:
         args = list(chunk_iterator(args, chunk_size))
-        s_fun = _chunk_spawn_fun  # spawn fun
+        s_fun = _chunk_spawn_fun  # type: ignore
     else:
-        s_fun = _spawn_fun  # spawn fun
+        s_fun = _spawn_fun  # type: ignore
 
     if (nprocs == 1 and not force_parallel) or force_serial:  # we want it serial (maybe for profiling)
         return list(map(f, tqdm(X, disable=not use_tqdm, **tqdm_kwargs)))
