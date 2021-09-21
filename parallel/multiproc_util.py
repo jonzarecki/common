@@ -1,10 +1,11 @@
+# pylint: disable=import-outside-toplevel,reimported,redefined-outer-name,invalid-name
 import itertools
 import logging
 import math
 import multiprocessing
 import sys
 import traceback
-from typing import Callable, Iterable, Sized, Tuple, List, Any, Dict, Iterator
+from typing import Any, Callable, Iterable, Iterator, List, Sized, Tuple
 
 from pathos.pools import ProcessPool as Pool
 from tqdm.autonotebook import tqdm
@@ -35,10 +36,10 @@ def _chunk_spawn_fun(args_list: Iterable[Tuple[Any, Callable[[Any], Any], int, b
 def _spawn_fun(args: Tuple[Any, Callable[[Any], Any], int, bool]) -> Any:
     """Internal function that spawned tqdm worked start from."""
     f_input, func, proc_i, keep_child_tqdm = args
-    import random  # noqa
-    import sys
+    import random  # pylint: disable=import-outside-toplevel
+    import sys  # pylint: disable=import-outside-toplevel
 
-    import numpy
+    import numpy  # pylint: disable=import-outside-toplevel
 
     old_err = sys.stderr
     if not keep_child_tqdm:
@@ -91,7 +92,7 @@ def parmap(  # noqa
     chunk_size: int = 1,
     use_tqdm: bool = False,
     keep_child_tqdm: bool = True,
-    **tqdm_kwargs: Dict[str, Any]
+    **tqdm_kwargs: object
 ) -> List[Any]:
     """Utility function for doing parallel calculations with multiprocessing.
 
@@ -141,11 +142,9 @@ def parmap(  # noqa
         p.restart(force=True)
         # can throw if current proc is daemon
         if use_tqdm:
-            retval_par = tqdm(
-                p.imap(lambda arg: s_fun(arg), args), total=int(len(X) / chunk_size), **tqdm_kwargs
-            )  # pylint: disable=unnecessary-lambda
+            retval_par = tqdm(p.imap(s_fun, args), total=int(len(X) / chunk_size), **tqdm_kwargs)
         else:
-            retval_par = p.map(lambda arg: s_fun(arg), args)  # pylint: disable=unnecessary-lambda
+            retval_par = p.map(s_fun, args)
 
         retval = list(retval_par)  # make it like the original map
         if chunk_size > 1:
