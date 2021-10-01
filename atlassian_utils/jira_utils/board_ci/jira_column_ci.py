@@ -34,6 +34,6 @@ def check_rules_compliance(rules: List[JiraRule], jira: JIRA) -> Dict[str, List[
         for iss in matching_issues:
             if not rule.does_ticket_violate_rule(iss):
                 continue
-            violations_dict[iss.key] = violations_dict.get(iss.key, []) + [rule]  # type: ignore
+            violations_dict[iss.key] = violations_dict.get(iss.key, []) + [rule]
 
     return violations_dict
