@@ -17,7 +17,7 @@ class JiraRule:
         pass
 
 
-def check_rules_compliance(rules: List[JiraRule], jira: JIRA) -> Dict[str, JiraRule]:
+def check_rules_compliance(rules: List[JiraRule], jira: JIRA) -> Dict[str, List[JiraRule]]:
     """Checks the compliance of the rules for the given rules.
 
     Args:
@@ -25,10 +25,9 @@ def check_rules_compliance(rules: List[JiraRule], jira: JIRA) -> Dict[str, JiraR
         jira: jira object to interact with
 
     Returns:
-        Dictionary between every violated issue and the rules it violated
-
+        Dictionary between every violated issue-key and the list of rules it violated
     """
-    violations_dict: Dict[str, JiraRule] = {}  # type: ignore
+    violations_dict: Dict[str, List[JiraRule]] = {}  # type: ignore
 
     for rule in rules:
         matching_issues = jira.search_issues(f"{rule.project_jql} AND {rule.filter_jql}")

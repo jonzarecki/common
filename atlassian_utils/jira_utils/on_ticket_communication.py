@@ -5,10 +5,10 @@ from typing import List
 from dotenv import load_dotenv
 from jira import Comment, Issue, JIRA, User
 
-from common.atlassian_utils.general import parse_date_str
+from common.atlassian_utils.general import parse_atls_date_str
 from common.atlassian_utils.jira_utils.user import load_user
 
-load_dotenv(f"{os.path.dirname(__file__)}/.env")  # config = {"USER": "foo", "EMAIL": "foo@example.org"}
+load_dotenv(f"{os.path.dirname(__file__)}/../.env")
 
 
 def _extract_tagged_users(jira: JIRA, s: str) -> List[User]:
@@ -23,7 +23,7 @@ def ticket_has_unanswered_question(jira: JIRA, iss: Issue) -> bool:
     except AttributeError:
         return False  # no comment
     author_email = last_comment.author.emailAddress
-    creation_date_no_tz = parse_date_str(last_comment.created, with_tz=False)  # in local time
+    creation_date_no_tz = parse_atls_date_str(last_comment.created, with_tz=False)  # in local time
     assert creation_date_no_tz is not None and author_email is not None
     tagged_users = _extract_tagged_users(jira, last_comment.body)
     return len(tagged_users) > 0

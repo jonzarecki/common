@@ -76,6 +76,7 @@ repos:
     hooks:
       - id: mypy
         exclude: ^notebooks.*$
+        #        args: [--implicit-reexport]
         additional_dependencies:
           - attrs
           - types-toml

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from jira import Issue, JIRA
 
-from common.atlassian_utils.general import parse_date_str
+from common.atlassian_utils.general import parse_atls_date_str
 
 
 def field_is_none(iss: Issue, field_name: str) -> bool:
@@ -29,14 +29,14 @@ def no_in_progress_epic(iss: Issue) -> bool:
 
 
 def no_update_for_x_days(iss: Issue, days_without_update: int) -> bool:
-    updated_no_tz = parse_date_str(iss.fields.updated, with_tz=False)  # in local time
+    updated_no_tz = parse_atls_date_str(iss.fields.updated, with_tz=False)  # in local time
     return (datetime.now() - updated_no_tz) > timedelta(days=days_without_update)
 
 
 def overdue(iss: Issue) -> bool:
     if iss.fields.duedate is None:
         return False
-    return parse_date_str(iss.fields.duedate, with_tz=False) > datetime.now()
+    return parse_atls_date_str(iss.fields.duedate, with_tz=False) > datetime.now()
 
 
 def flagged(iss: Issue) -> bool:
@@ -60,7 +60,6 @@ def no_linked_page_with_prefix(iss: Issue, link_prefix: str, jira_obj: JIRA) -> 
 
     Returns:
         True if condition holds, False otherwise.
-
     """
     # in the future, make sure the page is unique in the project?
     return any(rl.object.url.startswith(link_prefix) for rl in jira_obj.remote_links(iss.key))
