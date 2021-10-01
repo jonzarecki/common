@@ -1,0 +1,75 @@
+import os
+from email.message import EmailMessage
+from typing import List
+
+from dotenv import load_dotenv
+from jira import Issue, JIRA
+
+from common.atlassian_utils.jira_utils.user import user_exists
+
+load_dotenv(f"{os.path.dirname(__file__)}/../.env")  # config = {"USER": "foo", "EMAIL": "foo@example.org"}
+
+
+def build_email_body_from_jql(jira: JIRA, jql: str) -> EmailMessage:  # noqa
+    """Build email body as str from JQL."""
+    msg = EmailMessage()
+
+    msg.set_content("sdfkjsdkljh")
+
+    # me == the sender's email address
+    # you == the recipient's email address
+    msg["Subject"] = "Example"
+    msg["From"] = "me"
+    msg["To"] = "me"
+
+    return msg
+
+    # # Send the message via our own SMTP server.
+    # s = smtplib.SMTP('localhost')  # noqa
+    # s.send_message(msg)  # noqa
+    # s.quit()  # noqa
+
+
+def build_issue_into_mail(iss: Issue) -> str:
+    title = f"{iss.fields.summary}: done by - {iss.fields.assignee if iss.fields.assignee else 'Unassigned'}"
+    body = f"\n     {iss.fields.description}" if iss.fields.description else ""
+
+    return title + body
+
+
+def build_daily_email(jira: JIRA, project_key: str, team_members: List[str]) -> str:
+    """Builds a string with a 'daily email' with what each member is up to."""
+    if not project_exists(jira, project_key):
+        return f"No such project {project_key}"
+
+    message = ""
+    message += "Today's daily \n"
+
+    for member in team_members:
+        if user_exists(jira, member):
+            issues = jira.search_issues(f"project={project_key} and assignee!={member}")
+            member_str = "\n".join([build_issue_into_mail(iss) for iss in issues])
+        else:
+            member_str = f"User {member} doesn't exist"
+        message += f"\n\n {member_str}"
+
+    return message
+
+
+def project_exists(jira: JIRA, project_key: str) -> bool:
+    try:
+        jira.project(project_key)
+        return True
+    except jira.exceptions.JIRAError:
+        return False
+
+
+def main() -> None:
+    jira = JIRA(server=os.environ["JIRA_URL"], basic_auth=(os.environ["JIRA_USERNAME"], os.environ["JIRA_PASSWORD"]))
+    iss = jira.issue("JT-3")  # noqa
+    s = jira.search_issues("project=JT and assignee != currentUser()")  # noqa
+    a = 1  # noqa
+
+
+if __name__ == "__main__":
+    main()
