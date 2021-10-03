@@ -33,7 +33,7 @@ def check_if_comment_already_exists(iss: Issue, violation_body: str) -> Optional
     return None
 
 
-def write_violation_as_comment(iss: Issue, violation_body: str, jira_obj: JIRA) -> None:
+def write_violation_as_comment(iss: Issue, violation_body: str, jira_obj: JIRA) -> bool:
     """Writes the violation as a UNIQUE comment and flags the issue.
 
     Check if violation exists, if it does and was written more than 2 days ago, delete it and write a new one.
@@ -41,7 +41,8 @@ def write_violation_as_comment(iss: Issue, violation_body: str, jira_obj: JIRA) 
     # check if violation exists
     violation_comment_id = check_if_comment_already_exists(iss, violation_body)
     if violation_comment_id is not None:
-        return
+        return False
 
     write_jira_comment(iss.key, violation_body, jira_obj)
     flag_issue(iss.key, jira_obj)
+    return True
