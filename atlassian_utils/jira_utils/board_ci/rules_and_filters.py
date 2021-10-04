@@ -7,7 +7,10 @@ from common.atlassian_utils.general import parse_atls_date_str
 
 
 def field_is_none(iss: Issue, field_name: str) -> bool:
-    return iss.fields.__dict__[field_name] is None
+    try:
+        return iss.fields.__dict__[field_name] is None
+    except KeyError:
+        return True  # no such field
 
 
 def no_assignee(iss: Issue) -> bool:
@@ -65,11 +68,14 @@ def no_linked_page_with_prefix(iss: Issue, link_prefix: str, jira_obj: JIRA) -> 
     return any(rl.object.url.startswith(link_prefix) for rl in jira_obj.remote_links(iss.key))
 
 
-STATUS_IN_PROGRESS_FILTER = None
-STATUS_APPROVED_FILTER = None
-STATUS_BLOCKED_FILTER = None
-STATUS_BACKLOG_FILTER = None
-STATUS_CR_FILTER = None
+STORY_TASK_BUG_FILTER = "type in (Bug, Story, Task)"
+EPIC_FILTER = "type = Epic"
+SUBTASK_FILTER = "type = Subtask"
+STATUS_IN_PROGRESS_FILTER = 'status = "In Progress"'
+STATUS_APPROVED_FILTER = 'status = "In Progress"'
+STATUS_BLOCKED_FILTER = 'status = "Blocked"'
+STATUS_TODO_FILTER = 'status = "To Do"'
+STATUS_CR_FILTER = 'status = "CR"'
 
-IN_ACTIVE_SPRINT_FILTER = None  # customfield_10020
-BACKLOG_FILTER = None
+IN_ACTIVE_SPRINT_FILTER = "Sprint in openSprints ()"
+BACKLOG_FILTER = f'{STORY_TASK_BUG_FILTER} AND Sprint is EMPTY'
