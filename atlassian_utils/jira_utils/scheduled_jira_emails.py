@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from email.message import EmailMessage
 from typing import List
 
@@ -43,11 +44,11 @@ def build_daily_email(jira: JIRA, project_key: str, team_members: List[str]) -> 
         return f"No such project {project_key}"
 
     message = ""
-    message += "Today's daily \n"
+    message += f"{datetime.now().strftime('%m/%d/%Y')}'s daily \n"
 
     for member in team_members:
         if user_exists(jira, member):
-            issues = jira.search_issues(f"project={project_key} and assignee!={member}")
+            issues = jira.search_issues(f"project={project_key} and assignee={member} and Sprint in openSprints ()")
             member_str = "\n".join([build_issue_into_mail(iss) for iss in issues])
         else:
             member_str = f"User {member} doesn't exist"
@@ -65,6 +66,10 @@ def project_exists(jira: JIRA, project_key: str) -> bool:
 
 
 def main() -> None:
+    jira_obj = JIRA(
+        server=os.environ["JIRA_URL"], basic_auth=(os.environ["JIRA_USERNAME"], os.environ["JIRA_PASSWORD"])
+    )
+    _msg = build_daily_email(jira_obj, "JT", ["557058:8f50afc7-9921-4c17-8d6a-6cce70d675fd"])
     jira = JIRA(server=os.environ["JIRA_URL"], basic_auth=(os.environ["JIRA_USERNAME"], os.environ["JIRA_PASSWORD"]))
     iss = jira.issue("JT-3")  # noqa
     s = jira.search_issues("project=JT and assignee != currentUser()")  # noqa
