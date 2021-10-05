@@ -31,7 +31,11 @@ def ticket_has_unanswered_question(jira: JIRA, iss: Issue) -> bool:
 
 def main() -> None:
     jira = JIRA(server=os.environ["JIRA_URL"], basic_auth=(os.environ["JIRA_USERNAME"], os.environ["JIRA_PASSWORD"]))
-    iss = jira.issue("JT-3")
+    iss = jira.issue("JT-5")
+    from common.atlassian_utils.jira_utils.ticket_actions import \
+        transition_parent_tickets_to_match_children_in_open_sprint
+    transition_parent_tickets_to_match_children_in_open_sprint(['To Do', 'In Progress', 'Done'], "JT", jira,
+                                                               )
     assert ticket_has_unanswered_question(jira, iss)
     load_user(jira, "557058:8f50afc7-9921-4c17-8d6a-6cce70d675fd")
 
