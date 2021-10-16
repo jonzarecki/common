@@ -1,38 +1,19 @@
 import os
 from datetime import datetime
-from email.message import EmailMessage
 from typing import List
 
 from dotenv import load_dotenv
 from jira import Issue, JIRA
 
+from common.atlassian_utils.jira_utils.ticket import get_ticket_url_in_board
 from common.atlassian_utils.jira_utils.user import user_exists
 
 load_dotenv(f"{os.path.dirname(__file__)}/../.env")  # config = {"USER": "foo", "EMAIL": "foo@example.org"}
 
 
-def build_email_body_from_jql(jira: JIRA, jql: str) -> EmailMessage:  # noqa
-    """Build email body as str from JQL."""
-    msg = EmailMessage()
-
-    msg.set_content("sdfkjsdkljh")
-
-    # me == the sender's email address
-    # you == the recipient's email address
-    msg["Subject"] = "Example"
-    msg["From"] = "me"
-    msg["To"] = "me"
-
-    return msg
-
-    # # Send the message via our own SMTP server.
-    # s = smtplib.SMTP('localhost')  # noqa
-    # s.send_message(msg)  # noqa
-    # s.quit()  # noqa
-
-
 def build_issue_into_mail(iss: Issue) -> str:
-    title = f"{iss.fields.summary}: done by - {iss.fields.assignee if iss.fields.assignee else 'Unassigned'}"
+    title = f"[{iss.fields.summary}]({get_ticket_url_in_board(iss)}): done by - " \
+            f"{iss.fields.assignee if iss.fields.assignee else 'Unassigned'}"
     body = f"\n     {iss.fields.description}" if iss.fields.description else ""
 
     return title + body
@@ -41,10 +22,10 @@ def build_issue_into_mail(iss: Issue) -> str:
 def build_daily_email(jira: JIRA, project_key: str, team_members: List[str]) -> str:
     """Builds a string with a 'daily email' with what each member is up to."""
     if not project_exists(jira, project_key):
-        return f"No such project {project_key}"
+        return f"**No such project {project_key}**"
 
     message = ""
-    message += f"{datetime.now().strftime('%m/%d/%Y')}'s daily \n"
+    message += f"**{datetime.now().strftime('%m/%d/%Y')}'s Daily** \n"
 
     for member in team_members:
         if user_exists(jira, member):
