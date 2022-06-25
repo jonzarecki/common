@@ -71,12 +71,12 @@ def multi_channel_tile_slider(dataset: TileFeaturesDataset):
     # the plotting code
     plots = []
     sources = []
-    pathes = [a_img_paths, b_img_paths, c_img_paths]
+    paths = [a_img_paths, b_img_paths, c_img_paths]
     plot_num = 3
 
     for i in range(plot_num):
         p = figure(height=300, width=300)
-        img_paths = pathes[i]
+        img_paths = paths[i]
         # print(img_paths)
         source = ColumnDataSource(
             data=dict(url=[img_paths[0]] * n, url_orig=img_paths, x=[1] * n, y=[1] * n, w=[1] * n, h=[1] * n)

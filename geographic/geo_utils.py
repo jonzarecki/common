@@ -299,7 +299,7 @@ def geom2image_projection(image: np.array, bbox: tuple, geom: shapely.geometry, 
             image = geom2image_projection(image, bbox, linestring, color, fill)
         return image
     else:
-        raise Exception(f'get_geo_visibility doesnt support {type(geom)} geometry')
+        raise Exception(f"get_geo_visibility doesn't support {type(geom)} geometry")
 
     pts = np.array([transform(coord) for coord in coords])
 

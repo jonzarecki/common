@@ -129,7 +129,7 @@ class GeoMap:
 
             group_name: (str,default=None)
                 will take geometries and create a group in the LayerControl, gives a specific name for the group.
-                If None then does'nt group the geometries.
+                If None then doesn't group the geometries.
 
             change_bounds_on_click: whether a mouse-click on change the map bounds to the object
 
